@@ -16,13 +16,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 const theme = {
   root: {
-    base: "min-h-[100vh]",
+    base: "min-h-[100dvh]",
     collapsed: {
       on: "w-16",
       off: "w-72",
     },
     inner:
-      "h-full min-h-[100vh] overflow-y-auto overflow-x-hidden rounded-none rounded-r-lg bg-gray-50 px-3 py-4 dark:bg-gray-800",
+      "h-full min-h-[100dvh] overflow-y-auto overflow-x-hidden rounded-none rounded-r-lg bg-gray-50 px-3 py-4 dark:bg-gray-800",
   },
   collapse: {
     button:
@@ -99,9 +99,7 @@ const theme = {
 export default function Component() {
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  useEffect(() => {
-    console.log("isCollapsed:", isCollapsed);
-  }, [isCollapsed]);
+
   useEffect(() => {
     if (window.innerWidth <= 768) {
       setIsCollapsed(true);
@@ -115,7 +113,7 @@ export default function Component() {
     router.push("/");
   };
   return (
-    <div className="relative min-h-[100vh]">
+    <div className="relative min-h-[100dvh]">
       <Sidebar
         theme={theme}
         aria-label="Sidebar with logo branding example"

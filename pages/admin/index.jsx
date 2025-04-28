@@ -122,7 +122,11 @@ export default function Page() {
                 </span>
               </TableCell>
               <TableCell>
-                <Button color="gray" size="sm">
+                <Button
+                  color="gray"
+                  className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                  size="sm"
+                >
                   <IoPersonRemoveSharp />
                 </Button>
               </TableCell>
@@ -147,6 +151,7 @@ export default function Page() {
         <div className="flex items-center gap-2 mt-6">
           <Button
             color="gray"
+            className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             size="sm"
             onClick={goToFirstPage}
             disabled={currentPage === 1}
@@ -155,6 +160,7 @@ export default function Page() {
           </Button>
           <Button
             color="gray"
+            className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             size="sm"
             onClick={goToPreviousPage}
             disabled={currentPage === 1}
@@ -176,6 +182,7 @@ export default function Page() {
 
           <Button
             color="gray"
+            className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             size="sm"
             onClick={goToNextPage}
             disabled={currentPage === totalPages}
@@ -184,6 +191,7 @@ export default function Page() {
           </Button>
           <Button
             color="gray"
+            className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             size="sm"
             onClick={goToLastPage}
             disabled={currentPage === totalPages}

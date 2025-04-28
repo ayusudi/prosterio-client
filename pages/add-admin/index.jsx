@@ -112,14 +112,14 @@ export default function Page() {
           </div>
 
           <div>
-            <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
+            <Label htmlFor="confirmPassword">Password Confirmation</Label>
             <TextInput
               id="confirmPassword"
               name="confirmPassword"
               type="password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="Masukkan konfirmasi password admin"
+              placeholder="Re-type password"
               required
             />
           </div>
@@ -130,10 +130,16 @@ export default function Page() {
               onClick={backToAdmin}
               type="button"
               disabled={isLoading}
+              className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             >
-              Batal
+              Cancel
             </Button>
-            <Button color="blue" type="submit" disabled={isLoading}>
+            <Button
+              color="blue"
+              type="submit"
+              disabled={isLoading}
+              className="bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+            >
               {isLoading ? (
                 <>
                   <svg
@@ -156,10 +162,10 @@ export default function Page() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Menyimpan...
+                  Creating..
                 </>
               ) : (
-                "Simpan"
+                "Create"
               )}
             </Button>
           </div>

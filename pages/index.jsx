@@ -155,7 +155,6 @@ export default function Home() {
   };
 
   const verifyToken = async () => {
-    console.log("verify token");
     try {
       let { data } = await api.get("/api/users/myself", {
         headers: {
