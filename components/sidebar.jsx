@@ -1,3 +1,4 @@
+"use client";
 import {
   Sidebar,
   SidebarItem,
@@ -7,12 +8,12 @@ import {
 } from "flowbite-react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { LuLayoutDashboard } from "react-icons/lu";
-import { BsGearFill } from "react-icons/bs";
 import { RiBookMarkedLine } from "react-icons/ri";
 import { MdOutlineChat, MdKey, MdOutlineLogout } from "react-icons/md";
 import { IoPersonAddSharp } from "react-icons/io5";
 import { HiX } from "react-icons/hi";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 const theme = {
   root: {
     base: "min-h-[100vh]",
@@ -96,10 +97,23 @@ const theme = {
 };
 
 export default function Component() {
+  const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
   useEffect(() => {
     console.log("isCollapsed:", isCollapsed);
   }, [isCollapsed]);
+  useEffect(() => {
+    if (window.innerWidth <= 768) {
+      setIsCollapsed(true);
+    } else {
+      setIsCollapsed(false);
+    }
+  }, []);
+  const logOut = (e) => {
+    e.preventDefault();
+    localStorage.clear();
+    router.push("/");
+  };
   return (
     <div className="relative min-h-[100vh]">
       <Sidebar
@@ -115,7 +129,11 @@ export default function Component() {
             "flex items-center pb-3 " +
             (isCollapsed ? "justify-center" : "justify-end")
           }
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={() => {
+            if (window.innerWidth > 768) {
+              setIsCollapsed(!isCollapsed);
+            }
+          }}
         >
           {isCollapsed ? (
             <GiHamburgerMenu className="h-6 w-6 shrink-0 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" />
@@ -141,16 +159,13 @@ export default function Component() {
             <SidebarItem href="/add-it-talent" icon={IoPersonAddSharp}>
               Add IT Talent
             </SidebarItem>
-            <SidebarItem href="/add-admin" icon={MdKey}>
-              Add Admin
+            <SidebarItem href="/admin" icon={MdKey}>
+              Admin
             </SidebarItem>
             <SidebarItem href="/chat-history" icon={RiBookMarkedLine}>
               Chat History
             </SidebarItem>
-            <SidebarItem href="/settings" icon={BsGearFill}>
-              Settings
-            </SidebarItem>
-            <SidebarItem href="/" icon={MdOutlineLogout}>
+            <SidebarItem onClick={logOut} href="#" icon={MdOutlineLogout}>
               Log Out
             </SidebarItem>
           </SidebarItemGroup>

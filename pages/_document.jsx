@@ -5,7 +5,6 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        <title>Prosterio</title>
         <ThemeModeScript />
       </Head>
       <body className="antialiased">

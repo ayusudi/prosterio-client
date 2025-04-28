@@ -1,3 +1,4 @@
+"use client";
 import { Source_Sans_3 } from "next/font/google";
 import Sidebar from "./sidebar";
 import { useEffect, useState } from "react";
@@ -19,13 +20,13 @@ const DefaultLayout = ({ children }) => {
       title: "Chat History",
       icon: "📝",
     },
-    "/settings": {
-      title: "Settings",
-      icon: "⚙️",
-    },
     "/add-it-talent": {
       title: "Add IT Talent",
       icon: "🧑🏻‍💻",
+    },
+    "/admin": {
+      title: "Admin",
+      icon: "🔑",
     },
     "/add-admin": {
       title: "Add Admin",
