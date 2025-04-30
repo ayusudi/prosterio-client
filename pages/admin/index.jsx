@@ -16,6 +16,7 @@ import { useRouter } from "next/router";
 
 export default function Page() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [admins, setAdmins] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -38,6 +39,7 @@ export default function Page() {
       );
       setCurrentItems(updatedCurrentItems);
       setAdmins(data.data);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching admins:", error);
     }
@@ -77,129 +79,137 @@ export default function Page() {
 
   return (
     <DefaultLayout>
-      <div className="flex justify-between items-center mb-4 py-5">
-        <h2 className="text-xl font-semibold ml-1">List Admin</h2>
-        <Button
-          onClick={moveToAddAdmin}
-          color="blue"
-          className="bg-[#1884f7] hover:bg-[#007AFF] cursor-pointer"
-        >
-          + Add Admin
-        </Button>
-      </div>
-      <Table hoverable>
-        <TableHead>
-          <TableRow>
-            <TableHeadCell>Name</TableHeadCell>
-            <TableHeadCell>Email</TableHeadCell>
-            <TableHeadCell>Role</TableHeadCell>
-            <TableHeadCell>Action</TableHeadCell>
-          </TableRow>
-        </TableHead>
-        <TableBody className="divide-y">
-          {currentItems.map((admin, index) => (
-            <TableRow
-              key={index}
-              className={
-                index % 2 !== 0
-                  ? "bg-white hover:bg-white border-[#F6F8FB]"
-                  : "bg-[#edf6ff] hover:bg-[#edf6ff] border-[#F6F8FB]"
-              }
-            >
-              <TableCell className="font-medium text-gray-900">
-                {admin.name}
-              </TableCell>
-              <TableCell>{admin.email}</TableCell>
-              <TableCell>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    admin.role === "HR"
-                      ? "bg-amber-100 text-amber-800"
-                      : "bg-green-100 text-green-800"
-                  }`}
-                >
-                  {admin.role}
-                </span>
-              </TableCell>
-              <TableCell>
-                <Button
-                  color="gray"
-                  className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-                  size="sm"
-                >
-                  <IoPersonRemoveSharp />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <div className="flex items-center justify-between mt-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-700">Show Page</span>
-          <select
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
-            value={itemsPerPage}
-            onChange={handleItemsPerPageChange}
-          >
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-          </select>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-screen">
+          <div className="animate-spin rounded-full h-40 w-40 border-t-12 border-b-12 border-blue-900 dark:border-white"></div>
         </div>
-
-        <div className="flex items-center gap-2 mt-6">
-          <Button
-            color="gray"
-            className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-            size="sm"
-            onClick={goToFirstPage}
-            disabled={currentPage === 1}
-          >
-            First
-          </Button>
-          <Button
-            color="gray"
-            className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-            size="sm"
-            onClick={goToPreviousPage}
-            disabled={currentPage === 1}
-          >
-            {"<"}
-          </Button>
-
-          {pageNumbers.map((number) => (
+      ) : (
+        <>
+          <div className="flex justify-between items-center mb-4 py-5">
+            <h2 className="text-xl font-semibold ml-1">List Admin</h2>
             <Button
-              key={number}
-              color={currentPage === number ? "blue" : "#EDF6FF"}
-              size="sm"
-              className={currentPage === number ? "" : "bg-[#EDF6FF]"}
-              onClick={() => paginate(number)}
+              onClick={moveToAddAdmin}
+              color="blue"
+              className="bg-[#1884f7] hover:bg-[#007AFF] cursor-pointer"
             >
-              {number}
+              + Add Admin
             </Button>
-          ))}
+          </div>
+          <Table hoverable>
+            <TableHead>
+              <TableRow>
+                <TableHeadCell>Name</TableHeadCell>
+                <TableHeadCell>Email</TableHeadCell>
+                <TableHeadCell>Role</TableHeadCell>
+                <TableHeadCell>Action</TableHeadCell>
+              </TableRow>
+            </TableHead>
+            <TableBody className="divide-y">
+              {currentItems.map((admin, index) => (
+                <TableRow
+                  key={index}
+                  className={
+                    index % 2 !== 0
+                      ? "bg-white hover:bg-white border-[#F6F8FB]"
+                      : "bg-[#edf6ff] hover:bg-[#edf6ff] border-[#F6F8FB]"
+                  }
+                >
+                  <TableCell className="font-medium text-gray-900">
+                    {admin.name}
+                  </TableCell>
+                  <TableCell>{admin.email}</TableCell>
+                  <TableCell>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm ${
+                        admin.role === "HR"
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-green-100 text-green-800"
+                      }`}
+                    >
+                      {admin.role}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      color="gray"
+                      className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                      size="sm"
+                    >
+                      <IoPersonRemoveSharp />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-700">Show Page</span>
+              <select
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+              </select>
+            </div>
 
-          <Button
-            color="gray"
-            className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-            size="sm"
-            onClick={goToNextPage}
-            disabled={currentPage === totalPages}
-          >
-            {">"}
-          </Button>
-          <Button
-            color="gray"
-            className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-            size="sm"
-            onClick={goToLastPage}
-            disabled={currentPage === totalPages}
-          >
-            Last
-          </Button>
-        </div>
-      </div>
+            <div className="flex items-center gap-2 mt-6">
+              <Button
+                color="gray"
+                className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                size="sm"
+                onClick={goToFirstPage}
+                disabled={currentPage === 1}
+              >
+                First
+              </Button>
+              <Button
+                color="gray"
+                className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                size="sm"
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+              >
+                {"<"}
+              </Button>
+
+              {pageNumbers.map((number) => (
+                <Button
+                  key={number}
+                  color={currentPage === number ? "blue" : "#EDF6FF"}
+                  size="sm"
+                  className={currentPage === number ? "" : "bg-[#EDF6FF]"}
+                  onClick={() => paginate(number)}
+                >
+                  {number}
+                </Button>
+              ))}
+
+              <Button
+                color="gray"
+                className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                size="sm"
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+              >
+                {">"}
+              </Button>
+              <Button
+                color="gray"
+                className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                size="sm"
+                onClick={goToLastPage}
+                disabled={currentPage === totalPages}
+              >
+                Last
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
     </DefaultLayout>
   );
 }

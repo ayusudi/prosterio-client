@@ -16,9 +16,9 @@ const DefaultLayout = ({ children }) => {
       title: "Dashboard",
       icon: "📊",
     },
-    "/chat-history": {
+    "/chats": {
       title: "Chat History",
-      icon: "📝",
+      icon: "📬",
     },
     "/add-it-talent": {
       title: "Add IT Talent",
@@ -32,11 +32,7 @@ const DefaultLayout = ({ children }) => {
       title: "Add Admin",
       icon: "🔑",
     },
-    "/chats": {
-      title: "Chat",
-      icon: "📬",
-    },
-    "/chat": {
+    "/pm-assistant": {
       title: "PM Assistant",
       icon: "💬",
     },
@@ -53,7 +49,11 @@ const DefaultLayout = ({ children }) => {
   return (
     <div className={`${sourceSans.className} flex`}>
       <Sidebar />
-      <div className="flex-1 md:max-w-[860px] py-10 md:py-12 px-4 mx-auto ">
+      <div
+        className={`flex-1 md:max-w-[860px] py-10 md:py-12 ${
+          router.pathname === "/pm-assistant" ? "pb-0 md:pb-0" : ""
+        } px-4 mx-auto `}
+      >
         <div>
           <h1 className="text-3xl font-bold pb-2 md:pb-4 border-b-2 border-[#6495ed]">
             {current.icon} {current.title}

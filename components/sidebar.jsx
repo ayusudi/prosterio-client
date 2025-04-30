@@ -5,6 +5,9 @@ import {
   SidebarItemGroup,
   SidebarItems,
   SidebarLogo,
+  Modal,
+  ModalBody,
+  ModalFooter,
 } from "flowbite-react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { LuLayoutDashboard } from "react-icons/lu";
@@ -14,6 +17,7 @@ import { IoPersonAddSharp } from "react-icons/io5";
 import { HiX } from "react-icons/hi";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import api from "@/service/api";
 const theme = {
   root: {
     base: "min-h-[100dvh]",
@@ -99,6 +103,8 @@ const theme = {
 export default function Component() {
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (window.innerWidth <= 768) {
@@ -107,11 +113,57 @@ export default function Component() {
       setIsCollapsed(false);
     }
   }, []);
-  const logOut = (e) => {
-    e.preventDefault();
-    localStorage.clear();
-    router.push("/");
+
+  const handleLogout = async (shouldSave) => {
+    if (shouldSave && localStorage.getItem("chats")) {
+      setIsLoading(true);
+      try {
+        let chats = JSON.parse(localStorage.getItem("chats"));
+        chats.push({
+          role: "user",
+          content:
+            "create short title of this conversation and answer les than 30 character. answer only one title.",
+        });
+        let { data } = await api.post(
+          "/api/prompt",
+          { chats, max_token: 512 },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        chats.pop();
+        let response = await api.post(
+          "/api/chats",
+          {
+            title: data.response.trim(),
+            chats: chats,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Error saving chat history:", error);
+      } finally {
+        setIsLoading(false);
+        setShowConfirmModal(false);
+        localStorage.clear();
+        router.push("/");
+      }
+    } else {
+      setIsLoading(false);
+      setShowConfirmModal(false);
+      localStorage.clear();
+      router.push("/");
+    }
   };
+
   return (
     <div className="relative min-h-[100dvh]">
       <Sidebar
@@ -151,7 +203,7 @@ export default function Component() {
             <SidebarItem href="/dashboard" icon={LuLayoutDashboard}>
               Dashboard
             </SidebarItem>
-            <SidebarItem href="/chat" icon={MdOutlineChat}>
+            <SidebarItem href="/pm-assistant" icon={MdOutlineChat}>
               PM Assistant
             </SidebarItem>
             <SidebarItem href="/add-it-talent" icon={IoPersonAddSharp}>
@@ -160,15 +212,86 @@ export default function Component() {
             <SidebarItem href="/admin" icon={MdKey}>
               Admin
             </SidebarItem>
-            <SidebarItem href="/chat-history" icon={RiBookMarkedLine}>
+            <SidebarItem href="/chats" icon={RiBookMarkedLine}>
               Chat History
             </SidebarItem>
-            <SidebarItem onClick={logOut} href="#" icon={MdOutlineLogout}>
+            <SidebarItem
+              onClick={() => {
+                localStorage.getItem("chats") &&
+                localStorage.getItem("chats") !== "[]"
+                  ? setShowConfirmModal(true)
+                  : handleLogout(false);
+              }}
+              href="#"
+              icon={MdOutlineLogout}
+            >
               Log Out
             </SidebarItem>
           </SidebarItemGroup>
         </SidebarItems>
       </Sidebar>
+
+      <Modal
+        show={showConfirmModal}
+        onClose={() => !isLoading && setShowConfirmModal(false)}
+        className="fixed bottom-0 left-0 right-0 z-50"
+        position="center"
+      >
+        <ModalBody>
+          <h1 className="text-2xl font-bold mb-5">Confirm Logout</h1>
+          <div className="space-y-6">
+            <p className="text-base leading-relaxed">
+              Do you want to save your chat history before logging out?
+            </p>
+          </div>
+        </ModalBody>
+        <ModalFooter className="flex justify-end gap-2">
+          <button
+            onClick={() => handleLogout(true)}
+            disabled={isLoading}
+            className={`bg-blue-700 hover:bg-blue-800 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Saving...
+              </div>
+            ) : (
+              "Yes, Save"
+            )}
+          </button>
+          <button
+            onClick={() => handleLogout(false)}
+            disabled={isLoading}
+            className={`text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            No, Don't Save
+          </button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 }
