@@ -28,8 +28,6 @@ function Page() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      // Add validation and API call here
-      console.log(formData);
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
       router.push("/admin");

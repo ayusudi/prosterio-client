@@ -1,35 +1,102 @@
-import { Button, Modal, ModalBody, ModalHeader } from "flowbite-react";
+import {
+  Button,
+  Modal,
+  ModalBody,
+  ModalHeader,
+  ModalFooter,
+} from "flowbite-react";
 import { IoIosClose } from "react-icons/io";
+import { useState, useEffect } from "react"; // Added missing import
+import api from "@/service/api";
 
-export default function ModalDetailEditable({
-  files,
-  openModal,
-  setOpenModal,
-  selectedCV,
-  setSelectedCV,
-}) {
+export default function ModalDetailEditable({ setId, id, fetchData }) {
+  const [selectedEmployee, setSelectedEmployee] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedCV, setSelectedCV] = useState({
+    certifications: [],
+    distinctions: [],
+    educations: [],
+    email: "",
+    file_url: null,
+    full_name: "",
+    id: null,
+    job_title: "",
+    professional_experiences: [],
+    profile: "",
+    promotion_years: null,
+    publications: [],
+    skills: [],
+  });
+  const [isEdit, setIsEdit] = useState(false);
+
+  useEffect(() => {
+    const fetchCV = async () => {
+      try {
+        const response = await api.get(`/api/employees/${id}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setSelectedEmployee(response.data);
+        setSelectedCV(response.data);
+        setIsLoading(false);
+      } catch (error) {
+        console.log(error);
+        console.error("Error fetching CV:", error);
+      }
+    };
+    fetchCV();
+  }, [id]);
+
+  useEffect(() => {
+    // Fix: Use deep comparison or specific property checks instead of reference comparison
+    if (
+      selectedCV &&
+      selectedEmployee &&
+      JSON.stringify(selectedCV) !== JSON.stringify(selectedEmployee)
+    ) {
+      setIsEdit(true);
+    }
+  }, [id]);
+
+  const handleSave = async () => {
+    try {
+      let input = { ...selectedCV };
+      delete input.file_url;
+      delete input.id;
+      const response = await api.put(`/api/employees/${selectedCV.id}`, input, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      fetchData();
+      setId(null);
+    } catch (error) {
+      console.error("Error updating employee:", error);
+    }
+  };
+
   return (
-    <Modal
-      show={openModal}
-      onClose={() => setOpenModal(false)}
-      className="overflow-y-auto"
-    >
+    <Modal show={id} onClose={() => setId(null)} className="overflow-y-auto">
       <ModalHeader>CV Details</ModalHeader>
-      <ModalBody className="overflow-y-auto">
-        {selectedCV && (
+      <ModalBody className="overflow-y-auto  max-h-[80dvh]">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-[50dvh]">
+            <div className="animate-spin rounded-full h-20 w-20 border-t-12 border-b-12 border-blue-900 "></div>
+          </div>
+        ) : (
           <div className="space-y-4">
             <div>
               <div className="flex justify-between items-center mb-2">
                 <input
                   type="text"
-                  value={selectedCV.data.full_name}
+                  value={selectedCV.full_name}
                   onChange={(e) => {
                     setSelectedCV({
                       ...selectedCV,
-                      data: {
-                        ...selectedCV.data,
-                        full_name: e.target.value,
-                      },
+                      full_name: e.target.value,
                     });
                   }}
                   className="border-none focus:ring-0 text-xl font-bold bg-transparent w-full"
@@ -37,46 +104,27 @@ export default function ModalDetailEditable({
                 <Button
                   size="sm"
                   color="gray"
-                  className="w-32 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                  className="w-30 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                   onClick={() => {
-                    const file = files.find(
-                      (f) => f.name === selectedCV.filename
-                    );
-                    if (file) {
-                      // Create blob from the file with PDF MIME type
-                      const blob = new Blob([file], {
-                        type: "application/pdf",
-                      });
-                      const url = URL.createObjectURL(blob);
-                      window.open(url, "_blank");
-                      // Clean up the URL object after opening
-                      URL.revokeObjectURL(url);
-                    } else {
-                      // Fallback to API endpoint if file not found in state
-                      const fileUrl = `/api/documents/${selectedCV.filename}`;
-                      window.open(fileUrl, "_blank");
-                    }
+                    window.open(selectedCV.file_url, "_blank");
                   }}
                 >
                   View PDF
                 </Button>
               </div>
               <p className="cursor-not-allowed border-none focus:ring-0 text-gray-600 bg-transparent w-full">
-                {selectedCV.data.email}
+                {selectedCV.email}
               </p>
             </div>
 
             <div>
               <h4 className="font-semibold mb-2">Profile</h4>
               <textarea
-                value={selectedCV.data.profile}
+                value={selectedCV.profile}
                 onChange={(e) => {
                   setSelectedCV({
                     ...selectedCV,
-                    data: {
-                      ...selectedCV.data,
-                      profile: e.target.value,
-                    },
+                    profile: e.target.value,
                   });
                 }}
                 rows={4}
@@ -87,36 +135,30 @@ export default function ModalDetailEditable({
             <div>
               <h4 className="font-semibold mb-2">Skills</h4>
               <div className="flex flex-wrap gap-2">
-                {selectedCV.data.skills.map((skill, index) => (
+                {selectedCV.skills.map((skill, index) => (
                   <div key={index} className="flex items-center gap-1">
                     <div className="relative w-full">
                       <input
                         type="text"
                         value={skill}
                         onChange={(e) => {
-                          const newSkills = [...selectedCV.data.skills];
+                          const newSkills = [...selectedCV.skills];
                           newSkills[index] = e.target.value;
                           setSelectedCV({
                             ...selectedCV,
-                            data: {
-                              ...selectedCV.data,
-                              skills: newSkills,
-                            },
+                            skills: newSkills,
                           });
                         }}
                         className="bg-blue-100 text-blue-800 text-sm px-3 py-1 pr-8 rounded-full border-none focus:ring-0 w-full"
                       />
                       <button
                         onClick={() => {
-                          const newSkills = selectedCV.data.skills.filter(
+                          const newSkills = selectedCV.skills.filter(
                             (_, i) => i !== index
                           );
                           setSelectedCV({
                             ...selectedCV,
-                            data: {
-                              ...selectedCV.data,
-                              skills: newSkills,
-                            },
+                            skills: newSkills,
                           });
                         }}
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-red-700"
@@ -130,10 +172,7 @@ export default function ModalDetailEditable({
                   onClick={() => {
                     setSelectedCV({
                       ...selectedCV,
-                      data: {
-                        ...selectedCV.data,
-                        skills: [...selectedCV.data.skills, ""],
-                      },
+                      skills: [...selectedCV.skills, ""],
                     });
                   }}
                   className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full hover:bg-blue-200"
@@ -146,7 +185,7 @@ export default function ModalDetailEditable({
             <div className="pt-4">
               <h4 className="font-semibold mb-2">Professional Experience</h4>
               <div className="">
-                {selectedCV.data.professional_experiences.map((exp, index) => (
+                {selectedCV.professional_experiences.map((exp, index) => (
                   <div
                     key={index}
                     className="border-l-2 border-gray-200 pl-4 py-1"
@@ -158,7 +197,7 @@ export default function ModalDetailEditable({
                         value={exp.job_title}
                         onChange={(e) => {
                           const newExps = [
-                            ...selectedCV.data.professional_experiences,
+                            ...selectedCV.professional_experiences,
                           ];
                           newExps[index] = {
                             ...exp,
@@ -166,10 +205,7 @@ export default function ModalDetailEditable({
                           };
                           setSelectedCV({
                             ...selectedCV,
-                            data: {
-                              ...selectedCV.data,
-                              professional_experiences: newExps,
-                            },
+                            professional_experiences: newExps,
                           });
                         }}
                         className="pl-1.5 font-medium border-none focus:ring-0 bg-transparent w-full"
@@ -177,15 +213,12 @@ export default function ModalDetailEditable({
                       <button
                         onClick={() => {
                           const newExps =
-                            selectedCV.data.professional_experiences.filter(
+                            selectedCV.professional_experiences.filter(
                               (_, i) => i !== index
                             );
                           setSelectedCV({
                             ...selectedCV,
-                            data: {
-                              ...selectedCV.data,
-                              professional_experiences: newExps,
-                            },
+                            professional_experiences: newExps,
                           });
                         }}
                         className="w-60 text-red-500 hover:text-red-700 mt-2"
@@ -200,7 +233,7 @@ export default function ModalDetailEditable({
                         value={exp.company || ""}
                         onChange={(e) => {
                           const newExps = [
-                            ...selectedCV.data.professional_experiences,
+                            ...selectedCV.professional_experiences,
                           ];
                           newExps[index] = {
                             ...exp,
@@ -208,10 +241,7 @@ export default function ModalDetailEditable({
                           };
                           setSelectedCV({
                             ...selectedCV,
-                            data: {
-                              ...selectedCV.data,
-                              professional_experiences: newExps,
-                            },
+                            professional_experiences: newExps,
                           });
                         }}
                         className="w-40 pl-1.5 text-gray-600 border-none focus:ring-0 bg-transparent"
@@ -222,7 +252,7 @@ export default function ModalDetailEditable({
                         value={exp.date_start || ""}
                         onChange={(e) => {
                           const newExps = [
-                            ...selectedCV.data.professional_experiences,
+                            ...selectedCV.professional_experiences,
                           ];
                           newExps[index] = {
                             ...exp,
@@ -230,10 +260,7 @@ export default function ModalDetailEditable({
                           };
                           setSelectedCV({
                             ...selectedCV,
-                            data: {
-                              ...selectedCV.data,
-                              professional_experiences: newExps,
-                            },
+                            professional_experiences: newExps,
                           });
                         }}
                         className="w-22 pl-1.5 text-gray-600 border-none focus:ring-0 bg-transparent"
@@ -245,7 +272,7 @@ export default function ModalDetailEditable({
                         value={exp.date_end || ""}
                         onChange={(e) => {
                           const newExps = [
-                            ...selectedCV.data.professional_experiences,
+                            ...selectedCV.professional_experiences,
                           ];
                           newExps[index] = {
                             ...exp,
@@ -253,10 +280,7 @@ export default function ModalDetailEditable({
                           };
                           setSelectedCV({
                             ...selectedCV,
-                            data: {
-                              ...selectedCV.data,
-                              professional_experiences: newExps,
-                            },
+                            professional_experiences: newExps,
                           });
                         }}
                         className="w-22 pl-1.5 text-gray-600 border-none focus:ring-0 bg-transparent"
@@ -272,7 +296,7 @@ export default function ModalDetailEditable({
                       }
                       onChange={(e) => {
                         const newExps = [
-                          ...selectedCV.data.professional_experiences,
+                          ...selectedCV.professional_experiences,
                         ];
                         newExps[index] = {
                           ...exp,
@@ -282,10 +306,7 @@ export default function ModalDetailEditable({
                         };
                         setSelectedCV({
                           ...selectedCV,
-                          data: {
-                            ...selectedCV.data,
-                            professional_experiences: newExps,
-                          },
+                          professional_experiences: newExps,
                         });
                       }}
                       rows={3}
@@ -297,19 +318,16 @@ export default function ModalDetailEditable({
                   onClick={() => {
                     setSelectedCV({
                       ...selectedCV,
-                      data: {
-                        ...selectedCV.data,
-                        professional_experiences: [
-                          ...selectedCV.data.professional_experiences,
-                          {
-                            title: "",
-                            company: "",
-                            date_start: "",
-                            date_end: "",
-                            description: "",
-                          },
-                        ],
-                      },
+                      professional_experiences: [
+                        ...selectedCV.professional_experiences,
+                        {
+                          title: "",
+                          company: "",
+                          date_start: "",
+                          date_end: "",
+                          description: "",
+                        },
+                      ],
                     });
                   }}
                   className="text-blue-600 hover:text-blue-800"
@@ -321,7 +339,7 @@ export default function ModalDetailEditable({
 
             <div className="pt-4">
               <h4 className="font-semibold mb-2">Education</h4>
-              {selectedCV.data.educations.map((edu, index) => (
+              {selectedCV.educations.map((edu, index) => (
                 <div key={index} className="flex flex-col gap-0.5 mb-4">
                   <div className="flex justify-between">
                     <input
@@ -329,29 +347,23 @@ export default function ModalDetailEditable({
                       placeholder="Degree or Course Name"
                       value={edu.title}
                       onChange={(e) => {
-                        const newEdus = [...selectedCV.data.educations];
+                        const newEdus = [...selectedCV.educations];
                         newEdus[index] = { ...edu, title: e.target.value };
                         setSelectedCV({
                           ...selectedCV,
-                          data: {
-                            ...selectedCV.data,
-                            educations: newEdus,
-                          },
+                          educations: newEdus,
                         });
                       }}
                       className="font-medium border-none focus:ring-0 bg-transparent w-full"
                     />
                     <button
                       onClick={() => {
-                        const newEdus = selectedCV.data.educations.filter(
+                        const newEdus = selectedCV.educations.filter(
                           (_, i) => i !== index
                         );
                         setSelectedCV({
                           ...selectedCV,
-                          data: {
-                            ...selectedCV.data,
-                            educations: newEdus,
-                          },
+                          educations: newEdus,
                         });
                       }}
                       className="w-60 text-red-500 hover:text-red-700 mt-2"
@@ -365,17 +377,14 @@ export default function ModalDetailEditable({
                       placeholder="Institution Name"
                       value={edu.institution}
                       onChange={(e) => {
-                        const newEdus = [...selectedCV.data.educations];
+                        const newEdus = [...selectedCV.educations];
                         newEdus[index] = {
                           ...edu,
                           institution: e.target.value,
                         };
                         setSelectedCV({
                           ...selectedCV,
-                          data: {
-                            ...selectedCV.data,
-                            educations: newEdus,
-                          },
+                          educations: newEdus,
                         });
                       }}
                       className="text-gray-600 border-none focus:ring-0 bg-transparent"
@@ -386,7 +395,7 @@ export default function ModalDetailEditable({
                       placeholder="Start"
                       value={edu.date_start || edu.date_start || ""}
                       onChange={(e) => {
-                        const newEdus = [...selectedCV.data.educations];
+                        const newEdus = [...selectedCV.educations];
                         newEdus[index] = {
                           ...edu,
                           date_start: e.target.value,
@@ -394,10 +403,7 @@ export default function ModalDetailEditable({
                         };
                         setSelectedCV({
                           ...selectedCV,
-                          data: {
-                            ...selectedCV.data,
-                            educations: newEdus,
-                          },
+                          educations: newEdus,
                         });
                       }}
                       className="w-14 pl-1 text-gray-600 border-none focus:ring-0 bg-transparent"
@@ -408,7 +414,7 @@ export default function ModalDetailEditable({
                       type="text"
                       value={edu.date_end || edu.date_end || ""}
                       onChange={(e) => {
-                        const newEdus = [...selectedCV.data.educations];
+                        const newEdus = [...selectedCV.educations];
                         newEdus[index] = {
                           ...edu,
                           date_end: e.target.value,
@@ -416,10 +422,7 @@ export default function ModalDetailEditable({
                         };
                         setSelectedCV({
                           ...selectedCV,
-                          data: {
-                            ...selectedCV.data,
-                            educations: newEdus,
-                          },
+                          educations: newEdus,
                         });
                       }}
                       className="w-14 pl-1 text-gray-600 border-none focus:ring-0 bg-transparent"
@@ -431,14 +434,11 @@ export default function ModalDetailEditable({
                       placeholder="Your Score / Max Score"
                       value={edu.score}
                       onChange={(e) => {
-                        const newEdus = [...selectedCV.data.educations];
+                        const newEdus = [...selectedCV.educations];
                         newEdus[index] = { ...edu, score: e.target.value };
                         setSelectedCV({
                           ...selectedCV,
-                          data: {
-                            ...selectedCV.data,
-                            educations: newEdus,
-                          },
+                          educations: newEdus,
                         });
                       }}
                       className="text-gray-600 border-none focus:ring-0 bg-transparent"
@@ -450,19 +450,16 @@ export default function ModalDetailEditable({
                 onClick={() => {
                   setSelectedCV({
                     ...selectedCV,
-                    data: {
-                      ...selectedCV.data,
-                      educations: [
-                        ...selectedCV.data.educations,
-                        {
-                          degree: "",
-                          institution: "",
-                          date_start: "",
-                          date_end: "",
-                          gpa: "",
-                        },
-                      ],
-                    },
+                    educations: [
+                      ...selectedCV.educations,
+                      {
+                        degree: "",
+                        institution: "",
+                        date_start: "",
+                        date_end: "",
+                        gpa: "",
+                      },
+                    ],
                   });
                 }}
                 className="text-blue-600 hover:text-blue-800"
@@ -476,14 +473,11 @@ export default function ModalDetailEditable({
               <input
                 type="number"
                 placeholder="Year you started working professionally"
-                value={selectedCV.data.promotion_years || ""}
+                value={selectedCV.promotion_years || ""}
                 onChange={(e) => {
                   setSelectedCV({
                     ...selectedCV,
-                    data: {
-                      ...selectedCV.data,
-                      promotion_years: e.target.value,
-                    },
+                    promotion_years: e.target.value,
                   });
                 }}
                 className="w-full border rounded-md p-2 text-gray-700 bg-transparent"
@@ -493,7 +487,7 @@ export default function ModalDetailEditable({
             <div className="pt-4">
               <h4 className="font-semibold mb-2">Distinctions</h4>
               <div className="">
-                {selectedCV.data.distinctions.map((distinction, index) => (
+                {selectedCV.distinctions.map((distinction, index) => (
                   <div
                     key={index}
                     className="border-l-2 border-gray-200 pl-4 flex flex-col gap-0.5 "
@@ -504,19 +498,14 @@ export default function ModalDetailEditable({
                         placeholder="Distinction Name"
                         value={distinction.name}
                         onChange={(e) => {
-                          const newDistinctions = [
-                            ...selectedCV.data.distinctions,
-                          ];
+                          const newDistinctions = [...selectedCV.distinctions];
                           newDistinctions[index] = {
                             ...distinction,
                             name: e.target.value,
                           };
                           setSelectedCV({
                             ...selectedCV,
-                            data: {
-                              ...selectedCV.data,
-                              distinctions: newDistinctions,
-                            },
+                            distinctions: newDistinctions,
                           });
                         }}
                         className="font-medium border-none focus:ring-0 bg-transparent w-full"
@@ -524,15 +513,12 @@ export default function ModalDetailEditable({
                       <button
                         onClick={() => {
                           const newDistinctions =
-                            selectedCV.data.distinctions.filter(
+                            selectedCV.distinctions.filter(
                               (_, i) => i !== index
                             );
                           setSelectedCV({
                             ...selectedCV,
-                            data: {
-                              ...selectedCV.data,
-                              distinctions: newDistinctions,
-                            },
+                            distinctions: newDistinctions,
                           });
                         }}
                         className="w-60 text-red-500 hover:text-red-700 mt-2"
@@ -544,19 +530,14 @@ export default function ModalDetailEditable({
                       placeholder="Description of the distinction"
                       value={distinction.description}
                       onChange={(e) => {
-                        const newDistinctions = [
-                          ...selectedCV.data.distinctions,
-                        ];
+                        const newDistinctions = [...selectedCV.distinctions];
                         newDistinctions[index] = {
                           ...distinction,
                           description: e.target.value,
                         };
                         setSelectedCV({
                           ...selectedCV,
-                          data: {
-                            ...selectedCV.data,
-                            distinctions: newDistinctions,
-                          },
+                          distinctions: newDistinctions,
                         });
                       }}
                       rows={2}
@@ -568,13 +549,10 @@ export default function ModalDetailEditable({
                   onClick={() => {
                     setSelectedCV({
                       ...selectedCV,
-                      data: {
-                        ...selectedCV.data,
-                        distinctions: [
-                          ...selectedCV.data.distinctions,
-                          { name: "", description: "" },
-                        ],
-                      },
+                      distinctions: [
+                        ...selectedCV.distinctions,
+                        { name: "", description: "" },
+                      ],
                     });
                   }}
                   className="text-blue-600 hover:text-blue-800"
@@ -587,7 +565,7 @@ export default function ModalDetailEditable({
             <div className="pt-4">
               <h4 className="font-semibold mb-2">Publications</h4>
               <div className="">
-                {selectedCV.data.publications.map((publication, index) => (
+                {selectedCV.publications.map((publication, index) => (
                   <div key={index} className="border-l-2 border-gray-200 pl-4">
                     <div className="flex justify-between items-center">
                       <input
@@ -595,9 +573,7 @@ export default function ModalDetailEditable({
                         placeholder="Publication Title"
                         value={publication.title || publication}
                         onChange={(e) => {
-                          const newPublications = [
-                            ...selectedCV.data.publications,
-                          ];
+                          const newPublications = [...selectedCV.publications];
                           if (typeof publication === "string") {
                             newPublications[index] = e.target.value;
                           } else {
@@ -608,10 +584,7 @@ export default function ModalDetailEditable({
                           }
                           setSelectedCV({
                             ...selectedCV,
-                            data: {
-                              ...selectedCV.data,
-                              publications: newPublications,
-                            },
+                            publications: newPublications,
                           });
                         }}
                         className="font-medium border-none focus:ring-0 bg-transparent w-full"
@@ -619,15 +592,12 @@ export default function ModalDetailEditable({
                       <button
                         onClick={() => {
                           const newPublications =
-                            selectedCV.data.publications.filter(
+                            selectedCV.publications.filter(
                               (_, i) => i !== index
                             );
                           setSelectedCV({
                             ...selectedCV,
-                            data: {
-                              ...selectedCV.data,
-                              publications: newPublications,
-                            },
+                            publications: newPublications,
                           });
                         }}
                         className="w-60 text-red-500 hover:text-red-700 mt-2"
@@ -641,10 +611,7 @@ export default function ModalDetailEditable({
                   onClick={() => {
                     setSelectedCV({
                       ...selectedCV,
-                      data: {
-                        ...selectedCV.data,
-                        publications: [...selectedCV.data.publications, ""],
-                      },
+                      publications: [...selectedCV.publications, ""],
                     });
                   }}
                   className="text-blue-600 hover:text-blue-800"
@@ -657,35 +624,29 @@ export default function ModalDetailEditable({
             <div className="py-4">
               <h4 className="font-semibold mb-2">Certifications</h4>
               <ul className="space-y-2">
-                {selectedCV.data.certifications.map((cert, index) => (
+                {selectedCV.certifications.map((cert, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <input
                       type="text"
                       value={cert}
                       onChange={(e) => {
-                        const newCerts = [...selectedCV.data.certifications];
+                        const newCerts = [...selectedCV.certifications];
                         newCerts[index] = e.target.value;
                         setSelectedCV({
                           ...selectedCV,
-                          data: {
-                            ...selectedCV.data,
-                            certifications: newCerts,
-                          },
+                          certifications: newCerts,
                         });
                       }}
                       className="text-gray-700 border-none focus:ring-0 bg-transparent w-full"
                     />
                     <button
                       onClick={() => {
-                        const newCerts = selectedCV.data.certifications.filter(
+                        const newCerts = selectedCV.certifications.filter(
                           (_, i) => i !== index
                         );
                         setSelectedCV({
                           ...selectedCV,
-                          data: {
-                            ...selectedCV.data,
-                            certifications: newCerts,
-                          },
+                          certifications: newCerts,
                         });
                       }}
                       className="text-red-500 hover:text-red-700"
@@ -699,10 +660,7 @@ export default function ModalDetailEditable({
                 onClick={() => {
                   setSelectedCV({
                     ...selectedCV,
-                    data: {
-                      ...selectedCV.data,
-                      certifications: [...selectedCV.data.certifications, ""],
-                    },
+                    certifications: [...selectedCV.certifications, ""],
                   });
                 }}
                 className="text-blue-600 hover:text-blue-800 mt-2"
@@ -713,6 +671,24 @@ export default function ModalDetailEditable({
           </div>
         )}
       </ModalBody>
+      <ModalFooter>
+        <Button
+          color="gray"
+          className="hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+          onClick={() => setId(null)}
+        >
+          Close
+        </Button>
+        {isEdit && (
+          <Button
+            color="blue"
+            className="hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+            onClick={handleSave}
+          >
+            Save
+          </Button>
+        )}
+      </ModalFooter>
     </Modal>
   );
 }

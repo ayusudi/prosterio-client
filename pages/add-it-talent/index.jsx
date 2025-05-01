@@ -32,11 +32,7 @@ function Page() {
     [files]
   );
   const [counter, setCounter] = useState({
-    new: [
-      "nadia.frontdev@gmail.com",
-      "intan.ba@gmail.com",
-      "rafi.alamsyah@gmail.com",
-    ],
+    new: [],
     update: [],
   });
   const [selectedCV, setSelectedCV] = useState(null);
@@ -111,21 +107,27 @@ function Page() {
       const processedEmployees = await Promise.all(
         scanResults.map(async (employee) => {
           let file = files.find((file) => file.name === employee.filename);
-          let file_data = null;
           if (file) {
             try {
-              const arrayBuffer = await file.arrayBuffer();
-              file_data = btoa(
-                String.fromCharCode.apply(null, new Uint8Array(arrayBuffer))
-              );
+              // Send file to backend for processing
+              const formData = new FormData();
+              formData.append("file", file);
+              formData.append("file_name", file.name);
+
+              const response = await api.post("/api/gdrive", formData, {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  "Content-Type": "multipart/form-data",
+                },
+              });
+              return {
+                ...employee,
+                file_url: response.data.web_view_link,
+              };
             } catch (error) {
-              console.error("Error converting file to base64:", error);
+              console.error("Error processing file:", error);
             }
           }
-          return {
-            ...employee,
-            file_data,
-          };
         })
       );
 
@@ -135,14 +137,16 @@ function Page() {
           full_name: employee.data.full_name,
           email: employee.data.email,
           job_title: employee.data.job_title,
+          promotion_years: employee.data.promotion_years,
           profile: employee.data.profile,
-          skills: employee.data.skills,
-          professional_experiences: employee.data.professional_experiences,
-          educations: employee.data.educations,
+          skills: employee.data.skills || [],
+          professional_experiences:
+            employee.data.professional_experiences || [],
+          educations: employee.data.education || [],
           publications: employee.data.publications || [],
           distinctions: employee.data.distinctions || [],
           certifications: employee.data.certifications || [],
-          file_data: employee.file_data,
+          file_url: employee.file_url,
         })),
         new_emails: counter.new,
         update_emails: counter.update,

@@ -12,7 +12,12 @@ export default function isAdmin(Component) {
         localStorage.getItem("token") &&
         localStorage.getItem("role") === "SUPERUSER";
       if (!token) {
-        router.push("/");
+        return router.push("/");
+      } else if (
+        localStorage.getItem("token") &&
+        localStorage.getItem("role") !== "SUPERUSER"
+      ) {
+        return router.push("/dashboard");
       } else {
         setIsAuthenticated(true);
       }
