@@ -1,8 +1,8 @@
-"use client";
 import DefaultLayout from "@/components/default-layout";
 import Chat from "@/components/chat";
+import isAuth from "@/components/is-auth";
 
-export default function Page() {
+function PMAssistantPage() {
   return (
     <DefaultLayout>
       <div>
@@ -11,3 +11,5 @@ export default function Page() {
     </DefaultLayout>
   );
 }
+
+export default isAuth(PMAssistantPage);

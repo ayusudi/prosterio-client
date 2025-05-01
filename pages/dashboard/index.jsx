@@ -4,8 +4,9 @@ import BoardChart from "./_components/board-chart";
 import SankeyChart from "./_components/sankey-chart";
 import DefaultLayout from "@/components/default-layout";
 import { useEffect, useState } from "react";
+import isAuth from "@/components/is-auth";
 
-export default function Page() {
+function Page() {
   const [page, setPage] = useState("main"); // main, education, list
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState({
@@ -39,7 +40,7 @@ export default function Page() {
     <DefaultLayout>
       {isLoading ? (
         <div className="flex justify-center items-center h-screen">
-          <div className="animate-spin rounded-full h-40 w-40 border-t-12 border-b-12 border-blue-900 dark:border-white"></div>
+          <div className="animate-spin rounded-full h-40 w-40 border-t-12 border-b-12 border-blue-900 "></div>
         </div>
       ) : (
         <>
@@ -83,3 +84,5 @@ export default function Page() {
     </DefaultLayout>
   );
 }
+
+export default isAuth(Page);

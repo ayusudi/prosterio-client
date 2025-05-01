@@ -1,10 +1,9 @@
 "use client";
+import isAuth from "@/components/is-auth";
 import Layout from "./layout";
-import api from "@/service/api";
-import { useEffect, useState } from "react";
 import { IoIosChatboxes } from "react-icons/io";
 
-export default function Page() {
+function Page() {
   return (
     <Layout>
       <div className="flex flex-col gap-4">
@@ -16,3 +15,4 @@ export default function Page() {
     </Layout>
   );
 }
+export default isAuth(Page);

@@ -161,7 +161,8 @@ export default function Home() {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      let { name, email, role } = data;
+
+      let { name, email, role } = data.user;
       localStorage.setItem("name", name);
       localStorage.setItem("email", email);
       localStorage.setItem("role", role);

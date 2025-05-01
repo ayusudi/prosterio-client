@@ -13,8 +13,9 @@ import {
 import { useEffect, useState } from "react";
 import api from "@/service/api";
 import { useRouter } from "next/router";
+import isAdmin from "@/components/is-admin";
 
-export default function Page() {
+function Page() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [admins, setAdmins] = useState([]);
@@ -81,7 +82,7 @@ export default function Page() {
     <DefaultLayout>
       {isLoading ? (
         <div className="flex justify-center items-center h-screen">
-          <div className="animate-spin rounded-full h-40 w-40 border-t-12 border-b-12 border-blue-900 dark:border-white"></div>
+          <div className="animate-spin rounded-full h-40 w-40 border-t-12 border-b-12 border-blue-900 "></div>
         </div>
       ) : (
         <>
@@ -114,9 +115,7 @@ export default function Page() {
                       : "bg-[#edf6ff] hover:bg-[#edf6ff] border-[#F6F8FB]"
                   }
                 >
-                  <TableCell className="font-medium text-gray-900">
-                    {admin.name}
-                  </TableCell>
+                  <TableCell className="font-medium">{admin.name}</TableCell>
                   <TableCell>{admin.email}</TableCell>
                   <TableCell>
                     <span
@@ -132,7 +131,7 @@ export default function Page() {
                   <TableCell>
                     <Button
                       color="gray"
-                      className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                      className="cursor-pointer focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                       size="sm"
                     >
                       <IoPersonRemoveSharp />
@@ -159,7 +158,7 @@ export default function Page() {
             <div className="flex items-center gap-2 mt-6">
               <Button
                 color="gray"
-                className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                className=" hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                 size="sm"
                 onClick={goToFirstPage}
                 disabled={currentPage === 1}
@@ -168,7 +167,7 @@ export default function Page() {
               </Button>
               <Button
                 color="gray"
-                className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                className=" hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                 size="sm"
                 onClick={goToPreviousPage}
                 disabled={currentPage === 1}
@@ -190,7 +189,7 @@ export default function Page() {
 
               <Button
                 color="gray"
-                className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                className=" hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                 size="sm"
                 onClick={goToNextPage}
                 disabled={currentPage === totalPages}
@@ -199,7 +198,7 @@ export default function Page() {
               </Button>
               <Button
                 color="gray"
-                className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                className=" hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                 size="sm"
                 onClick={goToLastPage}
                 disabled={currentPage === totalPages}
@@ -213,3 +212,5 @@ export default function Page() {
     </DefaultLayout>
   );
 }
+
+export default isAdmin(Page);

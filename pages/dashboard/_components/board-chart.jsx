@@ -1,3 +1,4 @@
+"use client";
 import {
   BarChart,
   Bar,
@@ -53,19 +54,19 @@ export default function Page({ data }) {
   const pieColors = ["#0088FE", "#00C49F", "#FFBB28"];
 
   // Calculate total employees for center text
-  const totalEmployees = data.experience_level_distribution.reduce(
+  const totalEmployees = data?.experience_level_distribution?.reduce(
     (sum, item) => sum + item.total_employees,
     0
   );
 
   // Prepare Chart.js data
   const doughnutData = {
-    labels: data.experience_level_distribution.map(
+    labels: data?.experience_level_distribution?.map(
       (item) => `${item.experience_level} (${item.total_employees})`
     ),
     datasets: [
       {
-        data: data.experience_level_distribution.map(
+        data: data?.experience_level_distribution?.map(
           (item) => item.total_employees
         ),
         backgroundColor: pieColors,
@@ -160,12 +161,12 @@ export default function Page({ data }) {
   }, [totalEmployees]);
 
   // Prepare data for Job Title Distribution chart
-  const jobTitleData = data.job_title_distribution.sort(
+  const jobTitleData = data?.job_title_distribution.sort(
     (a, b) => b.total_employees - a.total_employees
   );
 
   // Prepare data for Top Skills chart
-  const topSkillsData = data.top_skills.sort(
+  const topSkillsData = data?.top_skills.sort(
     (a, b) => b.total_employees - a.total_employees
   );
 
@@ -223,7 +224,7 @@ export default function Page({ data }) {
               <YAxis dataKey="skill" type="category" width={150} />
               <RechartsTooltip />
               <Bar dataKey="total_employees">
-                {topSkillsData.map((entry, index) => (
+                {topSkillsData?.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={jobColorPalette[index % jobColorPalette.length]}
@@ -273,7 +274,7 @@ export default function Page({ data }) {
             <YAxis />
             <RechartsTooltip />
             <Bar dataKey="total_employees">
-              {jobTitleData.map((entry, index) => (
+              {jobTitleData?.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={jobColorPalette[jobColorPalette.length - index - 1]}

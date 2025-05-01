@@ -4,7 +4,6 @@ import {
   SidebarItem,
   SidebarItemGroup,
   SidebarItems,
-  SidebarLogo,
   Modal,
   ModalBody,
   ModalFooter,
@@ -105,12 +104,15 @@ export default function Component() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
     if (window.innerWidth <= 768) {
       setIsCollapsed(true);
     } else {
       setIsCollapsed(false);
+    }
+    if (localStorage?.getItem("role") === "SUPERUSER") {
+      setIsAdmin(true);
     }
   }, []);
 
@@ -191,13 +193,31 @@ export default function Component() {
             <HiX className="h-6 w-6 shrink-0 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" />
           )}
         </div>
-        <SidebarLogo
+        {/* <SidebarLogo
           hidden={isCollapsed}
           onClick={() => console.log("logo clicked")}
           href="#"
           img="https://github.com/ayusudi/prosterio/blob/main/sidebarlogo.png?raw=true"
           imgAlt="Flowbite logo"
-        />
+        /> */}
+        <div
+          hidden={isCollapsed}
+          className="w-full p-2 max-w-sm flex items-center gap-3 mb-2 text-center"
+        >
+          <img
+            src="logo.png"
+            alt="Logo"
+            className="w-24 h-24 rounded-full " // Adjusted width and height
+          />
+          <div className="flex flex-col items-start justify-start">
+            <h1 className="text-md font-bold text-gray-800 dark:text-white">
+              Prosterio
+            </h1>
+            <p className="text-sm text-gray-500 text-left dark:text-blue-200">
+              Streamline Tech Talent for Project Managers
+            </p>
+          </div>
+        </div>
         <SidebarItems>
           <SidebarItemGroup>
             <SidebarItem href="/dashboard" icon={LuLayoutDashboard}>
@@ -209,9 +229,13 @@ export default function Component() {
             <SidebarItem href="/add-it-talent" icon={IoPersonAddSharp}>
               Add IT Talent
             </SidebarItem>
-            <SidebarItem href="/admin" icon={MdKey}>
-              Admin
-            </SidebarItem>
+            {isAdmin ? (
+              <SidebarItem href="/admin" icon={MdKey}>
+                Admin
+              </SidebarItem>
+            ) : (
+              <></>
+            )}
             <SidebarItem href="/chats" icon={RiBookMarkedLine}>
               Chat History
             </SidebarItem>

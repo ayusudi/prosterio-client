@@ -3,8 +3,9 @@ import DefaultLayout from "@/components/default-layout";
 import { Button, Label, TextInput, Select } from "flowbite-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import isAdmin from "@/components/is-admin";
 
-export default function Page() {
+function Page() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -57,7 +58,7 @@ export default function Page() {
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <Label htmlFor="name">Nama</Label>
+            <Label htmlFor="name">Full Name</Label>
             <TextInput
               id="name"
               name="name"
@@ -79,23 +80,6 @@ export default function Page() {
               placeholder="Masukkan email admin"
               required
             />
-          </div>
-
-          <div>
-            <Label htmlFor="role">Role</Label>
-            <Select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              required
-            >
-              <option value="" disabled>
-                Pilih role admin
-              </option>
-              <option value="HR">HR</option>
-              <option value="SUPERADMIN">Superadmin</option>
-            </Select>
           </div>
 
           <div>
@@ -130,7 +114,7 @@ export default function Page() {
               onClick={backToAdmin}
               type="button"
               disabled={isLoading}
-              className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+              className=" cursor-pointer focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             >
               Cancel
             </Button>
@@ -138,7 +122,7 @@ export default function Page() {
               color="blue"
               type="submit"
               disabled={isLoading}
-              className="bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+              className="cursor-pointer bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             >
               {isLoading ? (
                 <>
@@ -174,3 +158,5 @@ export default function Page() {
     </DefaultLayout>
   );
 }
+
+export default isAdmin(Page);

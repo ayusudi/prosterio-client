@@ -2,7 +2,7 @@ export default function HeaderLogin() {
   return (
     <div className="w-full p-2 max-w-sm flex items-center gap-4 text-center">
       <img
-        src="https://raw.githubusercontent.com/ayusudi/prosterio/refs/heads/main/logo.webp"
+        src="logo.png"
         alt="Logo"
         className="w-36 h-36 rounded-full " // Adjusted width and height
       />

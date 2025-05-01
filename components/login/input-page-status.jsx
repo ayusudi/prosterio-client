@@ -5,7 +5,7 @@ export default function InputPageStatus({ accountStatus, setAccountStatus }) {
         htmlFor="accountStatus"
         className="block mb-1 text-sm font-medium text-gray-700"
       >
-        Do you have Prosperio Account?
+        Do you have Prosterio Account?
       </label>
       <select
         id="accountStatus"

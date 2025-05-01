@@ -1,9 +1,7 @@
-"use client";
-
 import { Button } from "flowbite-react";
 
 export default function HeaderForFileUploaded({
-  files,
+  files = [],
   isLoading,
   processFiles,
 }) {
