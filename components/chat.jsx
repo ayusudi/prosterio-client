@@ -152,7 +152,7 @@ export default function Chat() {
 
       {/* Chat Messages */}
       <div className="flex flex-col flex-1 items-between bg-white pt-5">
-        <div className="flex grow flex-1 flex-col gap-6 overflow-y-auto max-h-[68dvh]">
+        <div className="flex grow flex-1 flex-col gap-6 overflow-y-auto max-h-[58dvh]">
           {chats
             .filter((chat) => chat.role !== "system")
             .map((chat, index) => (
