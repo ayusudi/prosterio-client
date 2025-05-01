@@ -33,7 +33,7 @@ function Page() {
 
   return (
     <Layout>
-      <div className="flex flex-col gap-4 overflow-y-auto">
+      <div className="flex flex-col gap-4 overflow-y-auto h-full">
         <ChatPreview chat={data} isLoading={isLoading} />
       </div>
     </Layout>
