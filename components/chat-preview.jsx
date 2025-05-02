@@ -45,9 +45,15 @@ export default function ChatPreview({ chat, isLoading }) {
                 } rounded-lg p-3`}
               >
                 {message.role === "user" ? (
-                  <p className="text-base text-gray-900 whitespace-pre-line">
-                    {message.content}
-                  </p>
+                  message.content.toLowerCase().trim().startsWith("/rag") ? (
+                    <p className="text-base text-gray-900 whitespace-pre-line">
+                      <b>/RAG</b> {message.content.trim().slice(4)}
+                    </p>
+                  ) : (
+                    <p className="text-base text-gray-900 whitespace-pre-line">
+                      {message.content}
+                    </p>
+                  )
                 ) : (
                   <div className="prose prose-sm prose-blue max-w-none">
                     <ReactMarkdown

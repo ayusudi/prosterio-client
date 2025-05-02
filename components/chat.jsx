@@ -1,7 +1,5 @@
 "use client";
 import api from "@/service/api";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -16,9 +14,19 @@ export default function Chat() {
 
   // Function to normalize text by removing excessive line breaks
   const normalizeText = (text) => {
-    return text
-      .replace(/\n{3,}/g, "\n\n") // Replace 3 or more line breaks with 2
-      .trim();
+    // Replace 3 or more line breaks with 2
+    let result = text.replace(/\n{3,}/g, "\n\n").trim();
+
+    // Convert markdown list items with bold label to plain text with <b>...</b>
+    result = result.replace(
+      /^\s*[\*\-]\s+\*\*(.+?)\*\:\s?/gm,
+      (_, label) => `<b>${label}:</b> `
+    );
+
+    // Remove any remaining list markers at the start of a line
+    result = result.replace(/^\s*[\*\-]\s+/gm, "");
+
+    return result;
   };
 
   const handleSubmit = async (e) => {
@@ -34,20 +42,40 @@ export default function Chat() {
         chats: [...chats, newUserMessage], // Include the new message
         max_token: maxTokens,
       };
-      const { data } = await api.post(
-        "/api/prompt",
-        JSON.stringify(requestBody),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+      if (message.trim().toLocaleLowerCase().startsWith("/rag")) {
+        let prompt = message.replace("/rag", "").trim();
+        const { data } = await api.post(
+          "/api/rag",
+          {
+            prompt: prompt,
           },
-        }
-      );
-      setChats((prev) => [
-        ...prev,
-        { role: "assistant", content: normalizeText(data.response) },
-      ]);
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        setChats((prev) => [
+          ...prev,
+          { role: "assistant", content: normalizeText(data.answer) },
+        ]);
+      } else {
+        const { data } = await api.post(
+          "/api/prompt",
+          JSON.stringify(requestBody),
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        setChats((prev) => [
+          ...prev,
+          { role: "assistant", content: normalizeText(data.response) },
+        ]);
+      }
     } catch (err) {
       setError(err.message);
       console.error("Error:", err);
@@ -179,42 +207,44 @@ export default function Chat() {
                     } rounded-lg p-3`}
                   >
                     {chat.role === "user" ? (
-                      <p className="text-base text-gray-900 whitespace-pre-line">
-                        {chat.content}
-                      </p>
+                      chat.content.toLowerCase().trim().startsWith("/rag") ? (
+                        <p className="text-base text-gray-900 whitespace-pre-line">
+                          <b>/RAG</b> {chat.content.trim().slice(4)}
+                        </p>
+                      ) : (
+                        <p className="text-base text-gray-900 whitespace-pre-line">
+                          {chat.content}
+                        </p>
+                      )
                     ) : (
                       <div className="prose prose-sm prose-blue max-w-none">
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={{
                             p: ({ children }) => (
-                              <p className="whitespace-pre-line">{children}</p>
+                              <p className="whitespace-pre-line mb-3">
+                                {children}
+                              </p>
                             ),
-                            code({
-                              node,
-                              inline,
-                              className,
-                              children,
-                              ...props
-                            }) {
-                              const match = /language-(\w+)/.exec(
-                                className || ""
-                              );
-                              return !inline && match ? (
-                                <SyntaxHighlighter
-                                  {...props}
-                                  style={atomDark}
-                                  language={match[1]}
-                                  PreTag="div"
-                                >
-                                  {String(children).replace(/\n$/, "")}
-                                </SyntaxHighlighter>
-                              ) : (
-                                <code {...props} className={className}>
-                                  {children}
-                                </code>
-                              );
-                            },
+                            h1: ({ node, ...props }) => (
+                              <h1 className="text-3xl font-bold" {...props} />
+                            ),
+                            h2: ({ node, ...props }) => (
+                              <h2
+                                className="text-2xl font-semibold"
+                                {...props}
+                              />
+                            ),
+                            li: ({ children }) => (
+                              <div className="mb-1">{children}</div>
+                            ),
+                            strong: ({ children }) => (
+                              <span className="font-bold">{children}</span>
+                            ),
+                            ul: ({ children }) => <div>{children}</div>,
+                            ol: ({ children }) => <div>{children}</div>,
+                            br: ({ children }) => <br />,
+                            // code: ({ children }) => <span>{children}</span>,
                           }}
                         >
                           {normalizeText(chat.content)}

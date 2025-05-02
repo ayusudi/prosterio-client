@@ -1,17 +1,24 @@
 "use client";
 import DefaultLayout from "@/components/default-layout";
-import { Button, Label, TextInput, Select } from "flowbite-react";
+import { Button, Label, TextInput, Select, Alert } from "flowbite-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import isAdmin from "@/components/is-admin";
+import api from "@/service/api";
+import Toast from "@/components/toast";
 
 function Page() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    role: "",
     password: "",
     confirmPassword: "",
   });
@@ -22,19 +29,67 @@ function Page() {
       ...prev,
       [name]: value,
     }));
+    // Clear error when user types
+    if (name === "password" || name === "confirmPassword") {
+      setError("");
+    }
+  };
+
+  const validateForm = () => {
+    if (formData.password !== formData.confirmPassword) {
+      setError("Password and confirmation password do not match");
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
+    if (!validateForm()) {
+      return "";
+    }
+
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push("/admin");
+      let res = await api.post(
+        "/api/users",
+        {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setToast({
+        show: true,
+        message: "Admin created successfully",
+        type: "success",
+      });
+      setTimeout(() => {
+        router.push("/admin");
+      }, 1500);
     } catch (error) {
-      console.error("Error submitting form:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to create admin";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
     }
   };
 
@@ -44,6 +99,7 @@ function Page() {
 
   return (
     <DefaultLayout>
+      {toast.show && <Toast toast={toast} setToast={setToast} />}
       <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md my-5">
         <div className="flex justify-between items-center mb-6">
           <p className="text-gray-600 ">Isi data admin di bawah ini.</p>
@@ -54,6 +110,13 @@ function Page() {
             ✕
           </button>
         </div>
+
+        {error && (
+          <Alert color="failure" className="mb-4">
+            {error}
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="name">Full Name</Label>

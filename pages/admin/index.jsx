@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import api from "@/service/api";
 import { useRouter } from "next/router";
 import isAdmin from "@/components/is-admin";
+import Toast from "@/components/toast";
 
 function Page() {
   const router = useRouter();
@@ -23,6 +24,11 @@ function Page() {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
   const [currentItems, setCurrentItems] = useState([]);
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
   const fetchAdmins = async () => {
     try {
       const { data } = await api("/api/users", {
@@ -43,6 +49,11 @@ function Page() {
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching admins:", error);
+      setToast({
+        show: true,
+        message: "Failed to fetch admin data. Please try again.",
+        type: "error",
+      });
     }
   };
   useEffect(() => {
@@ -77,6 +88,28 @@ function Page() {
     setCurrentPage((prev) => Math.max(1, prev - 1));
   const goToNextPage = () =>
     setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+  const deleteHR = async (id) => {
+    try {
+      await api.delete(`/api/users/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      fetchAdmins();
+      setToast({
+        show: true,
+        message: "Admin deleted successfully",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Error deleting HR:", error);
+      setToast({
+        show: true,
+        message: "Failed to delete admin. Please try again.",
+        type: "error",
+      });
+    }
+  };
 
   return (
     <DefaultLayout>
@@ -86,6 +119,7 @@ function Page() {
         </div>
       ) : (
         <>
+          {toast.show && <Toast toast={toast} setToast={setToast} />}
           <div className="flex justify-between items-center mb-4 py-5">
             <h2 className="text-xl font-semibold ml-1">List Admin</h2>
             <Button
@@ -129,13 +163,16 @@ function Page() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      color="gray"
-                      className="cursor-pointer focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-                      size="sm"
-                    >
-                      <IoPersonRemoveSharp />
-                    </Button>
+                    {admin.role === "HR" ? (
+                      <Button
+                        onClick={() => deleteHR(admin.id)}
+                        color="gray"
+                        className="cursor-pointer focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                        size="sm"
+                      >
+                        <IoPersonRemoveSharp />
+                      </Button>
+                    ) : null}
                   </TableCell>
                 </TableRow>
               ))}
