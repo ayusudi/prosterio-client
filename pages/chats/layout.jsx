@@ -38,6 +38,7 @@ export default function Layout({ children }) {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
+      router.push("/chats");
       fetchData();
     } catch (error) {
       console.error("Error deleting chat:", error);

@@ -177,6 +177,9 @@ export default function Home() {
       let errorMessage = "Failed to verify token. Please try again.";
       if (error.response) {
         switch (error.response.status) {
+          case 400:
+            errorMessage = "Invalid email/password. Please login again.";
+            break;
           case 401:
             errorMessage = "Invalid token. Please login again.";
             break;
@@ -187,6 +190,7 @@ export default function Home() {
             errorMessage = "Server error. Please try again later.";
             break;
         }
+        setToast({ show: true, message: errorMessage, type: "error" });
       }
     }
   };

@@ -9,8 +9,9 @@ import HeaderForFileUploaded from "./_components/header-for-file-uploaded";
 import Header from "./_components/header";
 import ModalDetailEditable from "./_components/modal-detail-editable";
 import isAuth from "@/components/is-auth";
-
+import { useRouter } from "next/router";
 function Page() {
+  const router = useRouter();
   const [scanResults, setScanResults] = useState([]);
   const [emailStatuses, setEmailStatuses] = useState({});
   const [files, setFiles] = useState([]);
@@ -175,9 +176,9 @@ function Page() {
             .filter((item) => item[1] === false)
             .map((el) => el[0]),
         });
-
         // Clear scan results after successful submission
         setScanResults([]);
+        router.push("/dashboard");
       }
     } catch (error) {
       console.error("Error submitting employees:", error);
