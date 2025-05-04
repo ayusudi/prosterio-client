@@ -240,7 +240,7 @@ function Page() {
                   {counter.new.length} New IT Talent{" "}
                   {counter.update.length > 0 ? "and" : ""}{" "}
                   {counter.update.length > 0
-                    ? `${counter.update.length} IT Talent ${
+                    ? `${counter.update.length} Update IT Talent ${
                         counter.update.length > 1 ? "s" : ""
                       }`
                     : ""}
