@@ -1,0 +1,39 @@
+
+client-prosterio/
+├── .env                      # File konfigurasi environment (NEXT_PUBLIC_API_URL=http://localhost:3001)
+├── .flowbite-react/          # Konfigurasi dan patch untuk Flowbite React
+├── components/               # Komponen yang dapat digunakan kembali
+│   ├── default-layout.jsx    # Layout utama aplikasi
+│   ├── sidebar.jsx           # Komponen sidebar untuk navigasi
+│   ├── is-auth.jsx           # HOC untuk autentikasi pengguna
+│   ├── is-admin.jsx          # HOC untuk autentikasi admin
+│   ├── chat.jsx              # Komponen untuk fitur chat dengan AI
+│   └── toast.jsx             # Komponen notifikasi
+├── pages/                    # Struktur routing Next.js
+│   ├── index.jsx             # Halaman login
+│   ├── _app.jsx              # Komponen utama Next.js
+│   ├── _document.jsx         # Kustomisasi dokumen HTML
+│   ├── dashboard/            # Halaman dashboard
+│   │   ├── _components/      # Komponen khusus dashboard
+│   │   │   ├── board-chart.jsx      # Visualisasi data
+│   │   │   ├── sankey-chart.jsx     # Diagram Sankey
+│   │   │   ├── employees.jsx        # Tabel karyawan
+│   │   │   └── modal-employee.jsx   # Modal detail karyawan
+│   │   └── index.jsx         # Halaman utama dashboard
+│   ├── chats/                # Fitur chat dengan AI
+│   │   ├── [id]/index.jsx    # Halaman detail chat
+│   │   ├── index.jsx         # Daftar chat
+│   │   └── layout.jsx        # Layout untuk halaman chat
+│   ├── add-it-talent/        # Halaman tambah talent IT
+│   │   ├── _components/      # Komponen untuk add-it-talent
+│   │   └── index.jsx         # Halaman utama add-it-talent
+│   ├── admin/                # Halaman admin
+│   └── add-admin/            # Halaman tambah admin
+├── public/                   # Aset statis (gambar, favicon, dll)
+├── service/                  # Layanan API
+│   └── api.js                # Konfigurasi Axios untuk API calls
+├── styles/                   # File CSS
+│   └── globals.css           # Style global dengan Tailwind CSS
+├── package.json              # Dependensi dan script npm
+├── tailwind.config.js        # Konfigurasi Tailwind CSS
+└── README.md                 # Dokumentasi proyek
